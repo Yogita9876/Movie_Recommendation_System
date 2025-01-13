@@ -36,7 +36,7 @@ class EnhancedMovieScraper:
         # Create data folder
         Path('data').mkdir(exist_ok=True)
         
-        # Cache for genre mappings
+        # Cache for genre mappings from TMDB
         self.genre_mapping = self._get_genre_mapping()
         
     def _get_genre_mapping(self):
@@ -149,7 +149,7 @@ class EnhancedMovieScraper:
                             self.movies_data.append(movie_info)
                             
                             print(f"📥 Collected '{movie['title']}' ({page}/{num_pages})")
-                            time.sleep(1)  # Be nice to the API
+                            time.sleep(1)  # TMDB rate limit. Adds a 1-second delay between TMDB API requests.
                 
             except Exception as e:
                 logging.error(f"Error fetching movies on page {page}: {str(e)}")
@@ -157,6 +157,9 @@ class EnhancedMovieScraper:
                 
     def clean_title_for_url(self, title):
         """Clean movie title for Letterboxd URL format"""
+        
+        # Parse the title for Letterboxd URL format
+        # We need this since Letterboxd has specific URL patterns
         # Remove special characters and convert to lowercase
         clean = re.sub(r'[^\w\s-]', '', title.lower())
         # Replace spaces with hyphens and remove multiple hyphens
@@ -190,7 +193,7 @@ class EnhancedMovieScraper:
             
             #url = f"https://letterboxd.com/film/{movie_title}-{movie_year}/reviews/by/activity/"
             
-            # Try different URL patterns
+            # Try different URL patterns since Letterboxd isn't consistent
             url_patterns = [
                 f"https://letterboxd.com/film/{movie_title}/reviews/by/activity/",
                 f"https://letterboxd.com/film/{movie_title}-{movie_year}/reviews/by/activity/",
@@ -264,7 +267,7 @@ class EnhancedMovieScraper:
                             print(f"Warning: Anonymous username found for review of {movie['title']}")
                     
                     print(f"📝 Got reviews for {movie['title']} ({i}/{len(movies_to_scrape)})")
-                    time.sleep(2)  # Be extra nice to Letterboxd
+                    time.sleep(2)  # Letterboxd rate limit. Adds a 2-second delay between requests to Letterboxd
                     
             except Exception as e:
                 logging.error(f"Error getting reviews for {movie['title']}: {str(e)}")

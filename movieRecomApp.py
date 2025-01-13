@@ -28,7 +28,7 @@ class HybridRecommender:
         self.mlb_director = MultiLabelBinarizer()
 
     def _preprocess_text_features(self, items_df: pd.DataFrame) -> None:
-        """Process text features using TF-IDF"""
+        """Process text features using TF-IDF. Combine the text features for better content matching"""
         text_features = (
             items_df['description'].fillna('') + ' ' + 
             items_df['categories'].fillna('') + ' ' + 
@@ -40,7 +40,7 @@ class HybridRecommender:
 
     def _preprocess_cast(self, items_df: pd.DataFrame) -> None:
         """Process cast members using one-hot encoding"""
-        # Convert string of cast members to list
+        # Split strings of cast members into lists for one-hot encoding
         cast_lists = items_df['cast'].fillna('').apply(
             lambda x: [name.strip() for name in str(x).split(',') if name.strip()]
         )
@@ -145,6 +145,7 @@ def main():
     cast_weight /= total_weight
 
     # Initialize recommender
+    # Cache the recommender to avoid retraining
     @st.cache_resource
     def load_recommender(c_weight, d_weight, cast_weight):
         recommender = HybridRecommender(
